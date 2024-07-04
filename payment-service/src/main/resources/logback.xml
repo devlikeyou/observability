@@ -1,0 +1,25 @@
+<configuration>
+    <springProperty name="newRelicAppenderEnabled" source="logging.newRelic.appender.enabled"/>
+    <appender name="DEV" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>[requestTraceId: %22X{requestTraceId}] - [ServiceName: payment-service]</pattern>
+        </encoder>
+    </appender>
+    <appender name="NR" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="com.newrelic.logging.logback.NewRelicEncoder">
+        </encoder>
+    </appender>
+    <appender name="NR_ASYNC" class="com.newrelic.logging.logback.NewRelicAsyncAppender">
+        <appender-ref ref="NR"/>
+    </appender>
+    <root level="INFO">
+        <if condition='property("newRelicAppenderEnabled").equals("true")'>
+            <then>
+                <appender-ref ref="NR_ASYNC" />
+            </then>
+            <else>
+                <appender-ref ref="DEV" />
+            </else>
+        </if>
+    </root>
+</configuration>

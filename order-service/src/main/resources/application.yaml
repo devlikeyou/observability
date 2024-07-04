@@ -1,0 +1,33 @@
+spring:
+  data:
+  mondodb:
+    uri:'mongodb://localhost:27017/dev-order'
+
+server:
+  port: 8080
+  shutdown: GRACEFUL
+
+
+logging:
+  newRelic:
+    appender:
+      enabled: ${NEW_RELIC_APPENDER_ENABLE:true}
+  level:
+    ROOT: ${LOG_ROOT_LEVEL:INFO}
+
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: full
+
+apis:
+  notificator:
+    url: ${notificator:http://localhost:8083/notificator}
+  payment:
+    url: ${payment:http://localhost:8081/payments}
+  picking:
+    url: ${picking:http://localhost:8082/pickings}

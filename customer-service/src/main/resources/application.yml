@@ -1,0 +1,17 @@
+server:
+  shutdown: GRACEFUL
+
+spring:
+  debug: true
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: full
+
+apis:
+  notification:
+    url: ${notification:http://localhost:8081/notifications}
