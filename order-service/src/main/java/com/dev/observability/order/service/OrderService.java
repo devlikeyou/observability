@@ -22,9 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -45,11 +43,10 @@ public class OrderService implements IOrderService {
     private NotificatorApiClient notificatorApi;
 
     private static String MSG_ORDER = "Notification to Order: ";
-    private static String TRACE_ID = "requestTraceId";
 
 
     @Override
-    public Order createOrder(final String requestTraceId, final OrderRequest orderRequest) {
+    public Order createOrder(final OrderRequest orderRequest) {
 
         Order order = Order.builder()
                 .customerId(orderRequest.getCustomerId())
@@ -59,24 +56,20 @@ public class OrderService implements IOrderService {
                 .status(OrderStatus.CREATED).build();
 
         Order orderInserted = orderRepository.insert(order);
-        log.info("Created order {} with status {} " , orderInserted.getId(), orderInserted.getStatus() );
 
 
-        PaymentResponse paymentResponse = postPayment(requestTraceId, orderRequest.getPayment(), orderInserted.getId());
+        PaymentResponse paymentResponse = postPayment(orderRequest.getPayment(), orderInserted.getId());
         orderInserted.setPaymentId(paymentResponse.getTransactionPaymentId());
         orderInserted.setStatus(OrderStatus.PAYMENT_APPROVED);
         orderRepository.save(orderInserted);
-        log.info("Updated order {} with status {} " , orderInserted.getId(), orderInserted.getStatus() );
 
 
-        PickingResponse pickingResponse = postPicking(requestTraceId, order.getId(), order.getStoreId());
+        PickingResponse pickingResponse = postPicking(order.getId(), order.getStoreId());
         orderInserted.setPaymentId(pickingResponse.getPickingId());
         orderInserted.setStatus(OrderStatus.PICKING_PENDING);
         orderRepository.save(orderInserted);
-        log.info("Updated order {} with status {} " , orderInserted.getId(), orderInserted.getStatus() );
 
-        postNotification(   requestTraceId,
-                            orderRequest.getStoreId(),
+        postNotification(   orderRequest.getStoreId(),
                             orderRequest.getStoreId(),
                             NotificationType.EMAIL.name(),
                             orderInserted.getId());
@@ -100,14 +93,6 @@ public class OrderService implements IOrderService {
     }
 
 
-
-    protected Map createHeaderWithRequestTrace(String requestTraceId) {
-        Map<String, Object> mapHeader = new HashMap<>();
-        mapHeader.put(TRACE_ID, requestTraceId);
-        return mapHeader;
-    }
-
-
     public void updateOrderStatusById(String orderId, OrderStatus newStatus) {
         Optional<Order> order = orderRepository.findById(orderId);
 
@@ -118,36 +103,33 @@ public class OrderService implements IOrderService {
     }
 
 
-    protected PaymentResponse postPayment(String requestTraceId, PaymentRequest paymentRequest, String orderId) {
+    protected PaymentResponse postPayment(PaymentRequest paymentRequest, String orderId) {
 
         try {
-            return paymentApi.postPayment(createHeaderWithRequestTrace(requestTraceId), paymentRequest);
+            return paymentApi.postPayment(paymentRequest);
         } catch(FeignException exception) {
             updateOrderStatusById(orderId, OrderStatus.PAYMENT_FAILED);
-            log.error("Error to connect PaymentService StatusCode: {}, Msg: {} ", exception.status(), exception.getMessage());
             throw new InternalServerErrorException("Error to Create Payment for order "+orderId);
         }
     }
 
 
 
-    protected PickingResponse postPicking(String requestTraceId, String orderId, String storeId) {
+    protected PickingResponse postPicking(String orderId, String storeId) {
 
         PickingRequest picking = PickingRequest.builder().storeId(storeId).orderId(orderId).build();
 
         try {
-            return pickingApi.postPicking(createHeaderWithRequestTrace(requestTraceId), picking);
+            return pickingApi.postPicking(picking);
         } catch(FeignException exception) {
             updateOrderStatusById(orderId, OrderStatus.PICKING_FAILED);
-            log.error("Error to connect PickingService StatusCode: {}, Msg: {} ", exception.status(), exception.getMessage());
             throw new InternalServerErrorException("Error to Create Picking for order "+orderId);
         }
     }
 
 
 
-    protected void postNotification(String requestTraceId,
-                                    String sender,
+    protected void postNotification(String sender,
                                     String receiver,
                                     String type,
                                     String orderId ) {
@@ -160,9 +142,8 @@ public class OrderService implements IOrderService {
                 .build();
 
         try {
-            notificatorApi.postNotificator(createHeaderWithRequestTrace(requestTraceId), notificatorRequest);
+            notificatorApi.postNotificator(notificatorRequest);
         } catch(FeignException exception) {
-            log.error("Error to connect NotificationService StatusCode: {}, Msg: {} ", exception.status(), exception.getMessage());
         }
     }
 

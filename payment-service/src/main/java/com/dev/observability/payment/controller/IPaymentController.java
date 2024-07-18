@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 public interface IPaymentController {
 
     public ResponseEntity<PaymentResponse> createPayment(
-            @RequestHeader String requestTraceId,
             @RequestBody PaymentRequest paymentRequest
     );
 

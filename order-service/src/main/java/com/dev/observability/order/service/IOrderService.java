@@ -5,7 +5,7 @@ import com.dev.observability.order.model.Order;
 
 public interface IOrderService {
 
-    Order createOrder(String requestTraceId, OrderRequest orderRequest);
+    Order createOrder(OrderRequest orderRequest);
 
 
 }

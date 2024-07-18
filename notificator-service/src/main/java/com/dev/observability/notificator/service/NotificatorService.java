@@ -11,6 +11,6 @@ public class NotificatorService implements INotificatorService {
     @Override
     public void sendNotification(Notificator notificator) {
         //Process to Notification
-        log.info("Notification Sent: {} " , notificator.getMsg());
+
     }
 }

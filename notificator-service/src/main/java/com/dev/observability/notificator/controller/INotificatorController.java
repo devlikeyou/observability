@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 public interface INotificatorController {
 
     ResponseEntity<Void> createNotification(
-            @RequestHeader String requestTraceId,
             @RequestBody NotificatorRequest notificatorRequest
             );
 

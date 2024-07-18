@@ -1,6 +1,0 @@
-Create a Strategy Error for Each Service.
-
-Order-Service        -> Customers -> ends -> 0,1
-Payment-Service      -> Customers -> ends -> 2,3,4
-Picking-Service      -> Customers -> ends -> 5,6,7
-Notification-Service -> Customers -> ends -> 8,9

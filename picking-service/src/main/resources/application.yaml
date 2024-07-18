@@ -6,10 +6,3 @@ spring:
 server:
   port: 8082
   shutdown: GRACEFUL
-
-logging:
-  newRelic:
-    appender:
-      enabled: ${NEW_RELIC_APPENDER_ENABLE:true}
-  level:
-    ROOT: ${LOG_ROOT_LEVEL:INFO}

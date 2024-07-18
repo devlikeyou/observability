@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 public interface IPickingController {
 
     ResponseEntity<PickingResponse> createPicking(
-            @RequestHeader String requestTraceId,
             @RequestBody PickingRequest pickingRequest );
 
 }

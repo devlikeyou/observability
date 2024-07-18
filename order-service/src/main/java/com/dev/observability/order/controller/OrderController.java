@@ -15,9 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.URI;
 import java.util.Arrays;
-import java.util.List;
 
 @Log4j2
 @RequiredArgsConstructor
@@ -29,25 +27,10 @@ public class OrderController implements IOrderController {
 
     @Override
     @PostMapping
-    @Trace
-    public ResponseEntity<OrderResponse> createOrder(String requestTraceId, OrderRequest orderRequest) {
+    public ResponseEntity<OrderResponse> createOrder(OrderRequest orderRequest) {
 
-        log.info("Received a request to create a new Order" );
-
-        if(hasError(requestTraceId)) {
-            log.error("Order has an Internal Error");
-            throw new InternalServerErrorException("Order has an Internal Error");
-        }
-
-        Order order = orderService.createOrder(requestTraceId, orderRequest);
-
-        log.info("Order Created with sucessfully {} " ,order.getId() );
+        Order order = orderService.createOrder(orderRequest);
         return ResponseEntity.ok(OrderResponse.builder().id(order.getId()).build());
-    }
-
-    private boolean hasError(String value){
-        return Arrays.asList("0","1").stream()
-                .anyMatch(c-> c.equals(value.substring(0,1)));
     }
 
 }
